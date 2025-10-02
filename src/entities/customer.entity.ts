@@ -1,10 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm"
 import { OrderEntity } from "./order.entity"
+import { MoneyNumberColumn } from "../decorators/moneyTransform"
 
 @Entity()
 export class CustomerEntity {
     @PrimaryGeneratedColumn()
-    public id: number
+    public id?: number
 
     @Column()
     public name: string
@@ -12,9 +13,9 @@ export class CustomerEntity {
     @Column()
     public isPremium: boolean
 
-    @Column()
+    @MoneyNumberColumn()
     public balance: number
 
     @OneToMany(() => OrderEntity, (order) => order.customer)
-    public orders: OrderEntity[]
+    public orders?: OrderEntity[]
 }

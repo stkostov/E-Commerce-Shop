@@ -1,19 +1,30 @@
-import { UpdateResult } from "typeorm";
-import { Product } from "../classes/product";
-import { AppDataSource } from "../data-source";
+import { EntityManager, FindOptionsWhere, UpdateResult } from "typeorm";
 import { ProductEntity } from "../entities/product.entity";
-import { ProductMapper } from "../mappers/productMapper";
+import { BaseService } from "./base.service";
+import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity.js";
 
-export class ProductService {
-    private productRepo = AppDataSource.getRepository(ProductEntity)
+export class ProductService extends BaseService {
 
-    async addProduct(product: Product): Promise<ProductEntity> {
-        const productToEntity = ProductMapper.toEntity(product)
-        return this.productRepo.save(productToEntity)
+    async addProduct(product: ProductEntity, manager?: EntityManager): Promise<ProductEntity> {
+        return this.rep(ProductEntity, manager).save(product)
+    }
+    async updateProduc(where: FindOptionsWhere<ProductEntity>, data: QueryDeepPartialEntity<ProductEntity>, manager?: EntityManager): Promise<UpdateResult> {
+        return this.rep(ProductEntity, manager).update(where, data)
     }
 
-    async removeProduct(product: Product): Promise<UpdateResult> {
-        const productToEntity = ProductMapper.toEntity(product)
-        return this.productRepo.softDelete(productToEntity.id)
+    async getCount(): Promise<number> {
+        return this.rep(ProductEntity).count()
+    }
+
+    async removeProduct(product: ProductEntity, manager?: EntityManager): Promise<UpdateResult> {
+        return this.rep(ProductEntity, manager).softDelete(product.id)
+    }
+
+    async findProduct(id: number, manager?: EntityManager): Promise<ProductEntity> {
+        return this.rep(ProductEntity, manager)
+        .findOne({ 
+            where: { id },
+            relations: { orderItems: true }
+        })
     }
 }

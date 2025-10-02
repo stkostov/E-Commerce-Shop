@@ -1,25 +1,37 @@
-import { Customer } from "./classes/customer";
-import { Order } from "./classes/order";
-import { Product } from "./classes/product";
 import { AppDataSource } from "./data-source";
-import { Status } from "./enums/status";
+import { CustomerService } from "./services/customer.service";
+import { OrderService } from "./services/order.service";
+import { ProductService } from "./services/product.service";
+import { StoreService } from "./services/store.service";
 import { Utils } from "./utilities/utils";
 
 async function main() {
-    console.log("running main()")
     try {
-        await AppDataSource.initialize();
-        console.log("DB initialized successfully");
+        const ds = await AppDataSource.initialize();
+
+        const productService = new ProductService(ds)
+        const customerService = new CustomerService(ds)
+        const orderService = new OrderService(ds)
+        const storeService = new StoreService(productService, customerService, orderService)
+        console.log("Seeding customers...")
+        await storeService.seedCustomers()
+        console.log("Seeding products...")
+        await storeService.seedProducts()
+
+        const customersCount = await customerService.getCount()
+        const productCount = await productService.getCount()
+        for(const customerId of [...Utils.rangeGenerator(customersCount)]) {
+            try {
+                const order = await storeService.createOrder(customerId, Utils.randomList(1, productCount, 5))
+                await storeService.payOrder(order)
+                await storeService.summerizeOrder(order.id)
+            } catch (err) {
+                console.error(err)
+            }
+        }
     } catch (err) {
         console.error("Error during Data Source initialization:", err);
     }
-    
-    let product = new Product("Bankai", 10, 100)
-    let order = new Order(1, Status.ORDERED, null, [product])
-    let customer = new Customer("Bleach", [order], 1000, true)
-
-    order.customer = customer
-    Utils.calculatePremiumDiscount(order)
 }
 
 main()
