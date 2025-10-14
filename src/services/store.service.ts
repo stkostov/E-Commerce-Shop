@@ -8,7 +8,6 @@ import { OrderEntity } from "../entities/order.entity"
 import { OrderItemEntity } from "../entities/orderItems.entity"
 import { Utils } from "../utilities/utils"
 import { AppDataSource } from "../data-source"
-import { EntityManager } from "typeorm"
 
 export class StoreService {
     constructor(private productService: ProductService,

@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "typeorm": "npx typeorm",
+    "build": "npx tsc",
     "start": "node dist/index.js"
   },
   "repository": {
